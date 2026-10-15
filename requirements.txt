@@ -1,0 +1,7 @@
+requests
+pytz
+pandas
+google-cloud-storage
+google-cloud-bigquery
+db-dtypes
+openpyxl
