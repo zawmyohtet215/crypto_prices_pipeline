@@ -6,15 +6,15 @@ import requests
 import pandas as pd
 from google.cloud import storage, bigquery
 
-# Environment Variables (Terraform ကတဆင့် ဝင်လာမည့် တန်ဖိုးများ)
+# Environment Variables
 PROJECT_ID = os.environ.get("PROJECT_ID", "crypto-price-live-dashboard")
 BUCKET_NAME = f"{PROJECT_ID}-crypto-raw"
-DATASET_ID = "raw"  # Terraform မှာ သတ်မှတ်ထားသည့် dataset_id "raw"
+DATASET_ID = "raw"  # dataset_id "raw" set up in terraform
 TABLE_ID = f"{PROJECT_ID}.{DATASET_ID}.coin_markets_raw"
 
 yangon_tz = pytz.timezone("Asia/Yangon")
 
-# CoinGecko API URLs (USD ဖြင့် Market Data ဆွဲရန် နှင့် USD/THB ဈေးနှုန်းများအတွက်)
+# CoinGecko API URLs
 url_market = "https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=3&page=1&sparkline=false"
 url_prices = "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,tether&vs_currencies=usd,thb"
 
@@ -26,7 +26,7 @@ def fetch_and_save_crypto():
 
     print(f"Fetching crypto data at {snapshot_at} (Yangon Time)...")
 
-    # API နှစ်ခုစလုံးကို ခေါ်ယူခြင်း
+    # Call both APIs
     res_market = requests.get(url_market)
     res_prices = requests.get(url_prices)
 
@@ -62,7 +62,7 @@ def fetch_and_save_crypto():
         }
         records.append(record)
 
-    # 1. GCS Bucket ထဲသို့ Raw JSON ဖိုင်ပုံစံဖြင့် တင်ခြင်း (Backup)
+    # 1. Load raw data into GCS Bucket
     try:
         storage_client = storage.Client()
         bucket = storage_client.bucket(BUCKET_NAME)
@@ -76,19 +76,19 @@ def fetch_and_save_crypto():
     except Exception as e:
         print(f"Error uploading to GCS: {e}")
 
-    # 2. BigQuery Table (raw.coin_markets_raw) ထဲသို့ ဒေတာထည့်သွင်းခြင်း
+    # 2. BigQuery Table (raw.coin_markets_raw) loading
     try:
         bq_client = bigquery.Client()
         df = pd.DataFrame(records)
         
-        # Timestamp field များကို Pandas datetime သို့ ပြောင်းရန်
+        # Timestamp field -> Pandas datetime
         df["snapshot_at"] = pd.to_datetime(df["snapshot_at"])
         df["ingested_at"] = pd.to_datetime(df["ingested_at"])
         if "last_updated" in df.columns:
             df["last_updated"] = pd.to_datetime(df["last_updated"])
 
         job = bq_client.load_table_from_dataframe(df, TABLE_ID)
-        job.result()  # ပြီးဆုံးသည်အထိ စောင့်ရန်
+        job.result()  # Wait result
         print(f"Successfully inserted {len(records)} rows into BigQuery table: {TABLE_ID}")
     except Exception as e:
         print(f"Error inserting data into BigQuery: {e}")
