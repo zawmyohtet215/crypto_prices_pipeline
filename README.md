@@ -8,6 +8,8 @@ A micro-batch data pipeline on Google Cloud that pulls cryptocurrency prices fro
 
 ![Crypto price pipeline architecture](crypto_pipeline_v2.png)
 
+Dashboard URL - https://datastudio.google.com/reporting/30df532b-af7d-4a7e-9526-b1e4fa950ef0
+
 ## Tech Stack
 
 | Layer | Tool |
@@ -19,7 +21,7 @@ A micro-batch data pipeline on Google Cloud that pulls cryptocurrency prices fro
 | Raw storage | Google Cloud Storage |
 | Warehouse | BigQuery |
 | Infrastructure as Code | Terraform (private repo) |
-| Visualization | Looker Studio (planned) |
+| Visualization | Looker Studio|
 
 ## Project Structure
 
