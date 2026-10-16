@@ -6,25 +6,7 @@ A micro-batch data pipeline on Google Cloud that pulls cryptocurrency prices fro
 
 ## Architecture
 
-```
-Cloud Scheduler (every 15 min)
-        |
-        v
-Cloud Run Job (Python ingestion container)
-        |
-        |--> CoinGecko API  (fetch prices)
-        |
-        v
-Cloud Storage (raw JSON)
-        |
-        v
-BigQuery
-  |-- raw        (landed data)
-  |-- analytics  (cleaned, query-ready tables)
-        |
-        v
-Looker Studio dashboard (planned)
-```
+![Crypto price pipeline architecture](crypto_pipeline_v2.png)
 
 ## Tech Stack
 
